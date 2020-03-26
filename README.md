@@ -1,3 +1,4 @@
-# Tic tac toe by Flutter
+# Tic tac toe (Flutter)
 
-A classic game done quickly with Flutter.
+A classic game which I did quickly with Flutter.
+Needs UI polishing and some misc improvements.
