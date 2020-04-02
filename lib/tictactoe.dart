@@ -454,7 +454,7 @@ class _TicTacToePageState extends State<TicTacToePage> {
     });
 
     final http.Response response = await http.put(
-      'http://192.168.10.38:3000/tic-tac-toe/update',
+      'https://tic-tac-toe-be.herokuapp.com/tic-tac-toe/update',
       body: json,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
