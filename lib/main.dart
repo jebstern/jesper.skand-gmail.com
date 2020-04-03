@@ -10,6 +10,7 @@ class MyApp extends StatelessWidget {
       title: "Tic Tac Toe",
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        fontFamily: "IndieFlower",
       ),
       home: MyHomePage(),
     );
@@ -84,11 +85,11 @@ class _MyHomePageState extends State<MyHomePage> {
                         value,
                         style: TextStyle(
                           color: Colors.black,
+                          fontFamily: "IndieFlower",
                         ),
                       ),
                     );
                   }).toList(),
-                  hint: Text("data"),
                 ),
               ),
               SizedBox(

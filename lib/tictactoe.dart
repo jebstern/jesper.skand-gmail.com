@@ -1,8 +1,9 @@
-import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:tic_tac_toe/leaderboard.dart';
 import 'package:tic_tac_toe/main.dart';
 import 'package:http/http.dart' as http;
+import 'package:tic_tac_toe/profile.dart';
 
 class TicTacToePage extends StatefulWidget {
   final String player;
@@ -23,7 +24,7 @@ class _TicTacToePageState extends State<TicTacToePage> {
   AppBar appBar;
   double viewHeight = 0;
   bool moveAllowed = true;
-  List<String> appbarActions = ["Log out", "Upload"];
+  List<String> appbarActions = ["Leaderboard", "Upload", "Log out"];
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +36,15 @@ class _TicTacToePageState extends State<TicTacToePage> {
             if (val.toLowerCase() == "upload") {
               _showDialog();
               _uploadResults();
-            } else {
+            } else if (val.toLowerCase() == "log out") {
               _logout();
+            } else {
+              showDialog<void>(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return LeaderBoardDialog();
+                  });
             }
           },
           itemBuilder: (BuildContext context) {
@@ -175,7 +183,7 @@ class _TicTacToePageState extends State<TicTacToePage> {
                   Text(
                     tiles[index],
                     style: TextStyle(
-                      fontSize: (viewHeight * 0.75 / 3 - 48),
+                      fontSize: (viewHeight * 0.75 / 3 - 60),
                     ),
                   ),
                 ],
@@ -194,7 +202,7 @@ class _TicTacToePageState extends State<TicTacToePage> {
       List<String> tilesCopy = List.from(tiles);
       tilesCopy.removeWhere((val) => val == "");
       if (gameOver) {
-        _showGameOverDialog(turn == "X" ? "Player won!" : "Computer won!");
+        _showGameOverDialog(turn == "X" ? "${widget.player} won!" : "Computer won!");
         _addWin();
       } else if (tilesCopy.length == 9) {
         _showGameOverDialog("It's a draw! How exciting...");
@@ -446,16 +454,17 @@ class _TicTacToePageState extends State<TicTacToePage> {
   }
 
   Future<void> _apiCall() async {
-    String json = jsonEncode(<String, dynamic>{
-      'username': widget.player,
-      'wins': playerWins,
-      'losses': computerWins,
-      'draws': draws,
-    });
+    final profile = Profile(
+      username: widget.player,
+      wins: playerWins,
+      losses: computerWins,
+      draws: draws,
+    );
 
     final http.Response response = await http.put(
       'https://tic-tac-toe-be.herokuapp.com/tic-tac-toe/update',
-      body: json,
+      //'http://192.168.10.38:3000/tic-tac-toe/update',
+      body: profile.toJson(),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
