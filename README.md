@@ -1,4 +1,7 @@
 # Tic tac toe (Flutter)
 
-A classic game which I did quickly with Flutter.
-Needs UI polishing and some misc improvements.
+A classic game, done with Flutter.
+Works quite well, though it needs some UI polishing and misc improvements.
+
+Demo:
+![Demo gif](tic_tac_toe.gif)
