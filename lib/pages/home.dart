@@ -16,9 +16,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Sign in",
-        ),
+        title: Text("Tic Tac Toe"),
         automaticallyImplyLeading: false,
       ),
       body: Center(
@@ -31,9 +29,7 @@ class _HomePageState extends State<HomePage> {
                 "Account sign in",
                 style: TextStyle(fontSize: 32),
               ),
-              SizedBox(
-                height: 24.0,
-              ),
+              SizedBox(height: 24.0),
               Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: DropdownButton<String>(
@@ -66,9 +62,7 @@ class _HomePageState extends State<HomePage> {
                   }).toList(),
                 ),
               ),
-              SizedBox(
-                height: 42.0,
-              ),
+              SizedBox(height: 42.0),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(),
                 child: const Padding(

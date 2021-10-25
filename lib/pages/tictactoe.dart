@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tic_tac_toe/controller/controller.dart';
 import 'package:tic_tac_toe/widgets/leaderboard.dart';
-import 'package:tic_tac_toe/pages/home.dart';
 
 class TicTacToePage extends StatefulWidget {
   final String player;
@@ -76,38 +75,31 @@ class _TicTacToePageState extends State<TicTacToePage> {
     viewHeight = MediaQuery.of(context).size.height - statusBarHeight - appBarHeight;
 
     return Column(
-      children: <Widget>[
-        Container(
-          height: viewHeight * 0.75,
-          child: Column(
-            children: _getTiles(),
-          ),
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        GridView.count(
+          shrinkWrap: true,
+          crossAxisCount: 3,
+          children: List.generate(9, (index) {
+            return _getTile(index);
+          }),
         ),
         Container(
-          height: viewHeight * 0.25,
           color: Colors.redAccent,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
-              children: <Widget>[
+              children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
+                  children: [
                     Text(
                       "Turn: " + (turn == "X" ? widget.player : "Computer"),
-                      style: TextStyle(
-                        fontSize: 24,
-                      ),
+                      style: TextStyle(fontSize: 32),
                     ),
-                    Text(
-                      "Player wins: " + playerWins.toString(),
-                    ),
-                    Text(
-                      "Computer wins: " + computerWins.toString(),
-                    ),
-                    Text(
-                      "Draws: " + draws.toString(),
-                    ),
+                    Text("Player wins: " + playerWins.toString(), style: TextStyle(fontSize: 16)),
+                    Text("Computer wins: " + computerWins.toString(), style: TextStyle(fontSize: 16)),
+                    Text("Draws: " + draws.toString(), style: TextStyle(fontSize: 16)),
                   ],
                 ),
               ],
@@ -127,66 +119,34 @@ class _TicTacToePageState extends State<TicTacToePage> {
     }
   }
 
-  List<Widget> _getTiles() {
-    return [
-      Expanded(
-        child: Row(
-          children: <Widget>[
-            _getTile(0),
-            _getTile(1),
-            _getTile(2),
-          ],
-        ),
-      ),
-      Expanded(
-        child: Row(
-          children: <Widget>[
-            _getTile(3),
-            _getTile(4),
-            _getTile(5),
-          ],
-        ),
-      ),
-      Expanded(
-        child: Row(
-          children: <Widget>[
-            _getTile(6),
-            _getTile(7),
-            _getTile(8),
-          ],
-        ),
-      ),
-    ];
-  }
-
   Widget _getTile(int index) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          if (moveAllowed) {
-            setState(() {
-              _setTileValue(index);
-            });
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16.0),
-            child: Container(
-              color: tiles[index] == "" ? Colors.blueAccent : (tiles[index] == "X" ? Colors.redAccent : Colors.greenAccent),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    tiles[index],
-                    style: TextStyle(
-                      fontSize: (viewHeight * 0.75 / 3 - 64),
-                    ),
-                  ),
-                ],
+    return GestureDetector(
+      onTap: () {
+        if (moveAllowed) {
+          setState(() {
+            _setTileValue(index);
+          });
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(6.0),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: tiles[index] == "" ? Colors.blueAccent : (tiles[index] == "X" ? Colors.redAccent : Colors.greenAccent)),
+            color: tiles[index] == "" ? Colors.blueAccent : (tiles[index] == "X" ? Colors.redAccent : Colors.greenAccent),
+          ),
+          child: Column(
+            children: [
+              Expanded(
+                child: tiles[index].isEmpty
+                    ? Container()
+                    : FittedBox(
+                        fit: BoxFit.fitWidth,
+                        child: Text(tiles[index]),
+                      ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -361,34 +321,29 @@ class _TicTacToePageState extends State<TicTacToePage> {
   }
 
   Future<void> _showGameOverDialog(String text) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Game over'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(
-                  text,
-                ),
-              ],
-            ),
+    Get.dialog(
+      AlertDialog(
+        title: Text("Game over"),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Text(text),
+            ],
           ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  tiles = ["", "", "", "", "", "", "", "", ""];
-                });
-                Navigator.of(context).pop();
-              },
-              child: const Text("OK"),
-            ),
-          ],
-        );
-      },
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              setState(() {
+                tiles = ["", "", "", "", "", "", "", "", ""];
+              });
+              Get.back();
+            },
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
     );
   }
 
@@ -419,7 +374,7 @@ class _TicTacToePageState extends State<TicTacToePage> {
         content: SingleChildScrollView(
           child: ListBody(
             children: <Widget>[
-              Text("This shouldn't take too long ..."),
+              Text("Please wait a few seconds ..."),
               Padding(
                 padding: const EdgeInsets.only(top: 12),
                 child: LinearProgressIndicator(
