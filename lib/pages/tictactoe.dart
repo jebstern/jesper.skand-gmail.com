@@ -1,27 +1,29 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:tic_tac_toe/leaderboard.dart';
-import 'package:tic_tac_toe/main.dart';
-import 'package:http/http.dart' as http;
-import 'package:tic_tac_toe/profile.dart';
+import 'package:get/get.dart';
+import 'package:tic_tac_toe/controller/controller.dart';
+import 'package:tic_tac_toe/widgets/leaderboard.dart';
+import 'package:tic_tac_toe/pages/home.dart';
 
 class TicTacToePage extends StatefulWidget {
   final String player;
 
-  TicTacToePage({Key key, @required this.player}) : super(key: key);
+  TicTacToePage({Key? key, required this.player}) : super(key: key);
 
   @override
   _TicTacToePageState createState() => _TicTacToePageState();
 }
 
 class _TicTacToePageState extends State<TicTacToePage> {
+  final Controller controller = Get.find();
+
   List<String> tiles = ["", "", "", "", "", "", "", "", ""];
   String turn = "X";
   int playerWins = 0;
   int computerWins = 0;
   int draws = 0;
   Random random = new Random();
-  AppBar appBar;
+  late AppBar appBar;
   double viewHeight = 0;
   bool moveAllowed = true;
   List<String> appbarActions = ["Leaderboard", "Upload", "Log out"];
@@ -34,11 +36,12 @@ class _TicTacToePageState extends State<TicTacToePage> {
         PopupMenuButton<String>(
           onSelected: (val) {
             if (val.toLowerCase() == "upload") {
-              _showDialog();
               _uploadResults();
             } else if (val.toLowerCase() == "log out") {
               _logout();
             } else {
+              controller.profileData = null;
+              controller.getProfiles();
               showDialog<void>(
                   context: context,
                   barrierDismissible: false,
@@ -70,8 +73,7 @@ class _TicTacToePageState extends State<TicTacToePage> {
   Widget _getBody(BuildContext context) {
     double statusBarHeight = MediaQuery.of(context).padding.top;
     double appBarHeight = appBar.preferredSize.height;
-    viewHeight =
-        MediaQuery.of(context).size.height - statusBarHeight - appBarHeight;
+    viewHeight = MediaQuery.of(context).size.height - statusBarHeight - appBarHeight;
 
     return Column(
       children: <Widget>[
@@ -118,7 +120,7 @@ class _TicTacToePageState extends State<TicTacToePage> {
 
   Future<void> executeAfterBuild() async {
     if (turn == "O") {
-      Future.delayed(const Duration(seconds: 1), () {
+      Future.delayed(const Duration(milliseconds: 500), () {
         int randomNumber = _getBestTileSelection();
         _setTileValue(randomNumber);
       });
@@ -172,18 +174,14 @@ class _TicTacToePageState extends State<TicTacToePage> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16.0),
             child: Container(
-              color: tiles[index] == ""
-                  ? Colors.blueAccent
-                  : (tiles[index] == "X"
-                      ? Colors.redAccent
-                      : Colors.greenAccent),
+              color: tiles[index] == "" ? Colors.blueAccent : (tiles[index] == "X" ? Colors.redAccent : Colors.greenAccent),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
                     tiles[index],
                     style: TextStyle(
-                      fontSize: (viewHeight * 0.75 / 3 - 60),
+                      fontSize: (viewHeight * 0.75 / 3 - 64),
                     ),
                   ),
                 ],
@@ -205,7 +203,7 @@ class _TicTacToePageState extends State<TicTacToePage> {
         _showGameOverDialog(turn == "X" ? "${widget.player} won!" : "Computer won!");
         _addWin();
       } else if (tilesCopy.length == 9) {
-        _showGameOverDialog("It's a draw! How exciting...");
+        _showGameOverDialog("It's a draw! How exciting ...");
         _addDraw();
       } else {
         setState(() {
@@ -379,14 +377,14 @@ class _TicTacToePageState extends State<TicTacToePage> {
             ),
           ),
           actions: <Widget>[
-            FlatButton(
-              child: Text('OK'),
+            TextButton(
               onPressed: () {
                 setState(() {
                   tiles = ["", "", "", "", "", "", "", "", ""];
                 });
                 Navigator.of(context).pop();
               },
+              child: const Text("OK"),
             ),
           ],
         );
@@ -414,70 +412,56 @@ class _TicTacToePageState extends State<TicTacToePage> {
     });
   }
 
-  Future<void> _showDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Uploading results'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text("This shouldn't take too long......."),
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: LinearProgressIndicator(
-                    value: null,
-                  ),
+  void _showDialog() {
+    Get.dialog(
+      AlertDialog(
+        title: Text('Uploading results'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Text("This shouldn't take too long ..."),
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: LinearProgressIndicator(
+                  value: null,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          actions: <Widget>[],
-        );
-      },
+        ),
+        actions: <Widget>[],
+      ),
+      barrierDismissible: false,
     );
   }
 
   void _uploadResults() async {
+    _showDialog();
     Future.delayed(const Duration(seconds: 2), () {
-      _apiCall();
+      _uploadData();
     });
   }
 
-  void _logout() async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => MyHomePage()),
-    );
-  }
+  void _logout() => Get.back();
 
-  Future<void> _apiCall() async {
-    final profile = Profile(
-      username: widget.player,
-      wins: playerWins,
-      losses: computerWins,
-      draws: draws,
-    );
+  Future<void> _uploadData() async {
+    Map<String, dynamic> data = {
+      "username": widget.player,
+      "wins": playerWins,
+      "losses": computerWins,
+      "draws": draws,
+    };
 
-    final http.Response response = await http.put(
-      'https://tic-tac-toe-be.herokuapp.com/tic-tac-toe/update',
-      //'http://192.168.10.38:3000/tic-tac-toe/update',
-      body: profile.toJson(),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
+    bool isUpdated = await controller.updateProfile(data);
 
-    Navigator.pop(context, null);
+    Get.back();
 
-    if (response.statusCode == 200) {
+    if (isUpdated) {
       setState(() {
         playerWins = 0;
         computerWins = 0;
         draws = 0;
       });
-    } else {}
+    }
   }
 }
