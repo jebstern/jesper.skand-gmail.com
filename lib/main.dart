@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:tic_tac_toe/controller/controller.dart';
 import 'package:tic_tac_toe/pages/home.dart';
 import 'package:tic_tac_toe/service/api_service.dart';
+import 'package:flutter/services.dart';
 
 void main() => runApp(MyApp());
 
@@ -12,6 +13,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     return GetMaterialApp(
       title: "Tic Tac Toe",
       theme: ThemeData(

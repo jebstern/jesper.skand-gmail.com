@@ -1,4 +1,4 @@
-package com.example.tic_tac_toe
+package com.jebstern.tic_tac_toe
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

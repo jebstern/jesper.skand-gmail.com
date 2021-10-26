@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tic_tac_toe/controller/controller.dart';
 import 'package:tic_tac_toe/widgets/leaderboard.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TicTacToePage extends StatefulWidget {
   final String player;
@@ -25,7 +26,8 @@ class _TicTacToePageState extends State<TicTacToePage> {
   late AppBar appBar;
   double viewHeight = 0;
   bool moveAllowed = true;
-  List<String> appbarActions = ["Leaderboard", "Upload", "Log out"];
+  List<String> appbarActions = ["Leaderboard", "Upload", "Privacy Policy", "Log out"];
+  String _privacyPolicy = "http://www.privacy-policy.jebstern.com/";
 
   @override
   Widget build(BuildContext context) {
@@ -36,17 +38,14 @@ class _TicTacToePageState extends State<TicTacToePage> {
           onSelected: (val) {
             if (val.toLowerCase() == "upload") {
               _uploadResults();
+            } else if (val.toLowerCase() == "privacy policy") {
+              _launchURL();
             } else if (val.toLowerCase() == "log out") {
               _logout();
             } else {
               controller.profileData = null;
               controller.getProfiles();
-              showDialog<void>(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) {
-                    return LeaderBoardDialog();
-                  });
+              Get.dialog(LeaderBoardDialog(), barrierDismissible: false);
             }
           },
           itemBuilder: (BuildContext context) {
@@ -367,7 +366,7 @@ class _TicTacToePageState extends State<TicTacToePage> {
     });
   }
 
-  void _showDialog() {
+  void _uploadResults() async {
     Get.dialog(
       AlertDialog(
         title: Text('Uploading results'),
@@ -388,10 +387,7 @@ class _TicTacToePageState extends State<TicTacToePage> {
       ),
       barrierDismissible: false,
     );
-  }
 
-  void _uploadResults() async {
-    _showDialog();
     Future.delayed(const Duration(seconds: 2), () {
       _uploadData();
     });
@@ -419,4 +415,6 @@ class _TicTacToePageState extends State<TicTacToePage> {
       });
     }
   }
+
+  void _launchURL() async => await canLaunch(_privacyPolicy) ? await launch(_privacyPolicy) : throw 'Could not launch $_privacyPolicy';
 }
